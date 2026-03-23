@@ -28,9 +28,16 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handler(w, r)
-
 }
 
+
+
 func main() {
-	fmt.Println("hi")
+	r := NewRouter()
+
+	r.Handle("/hi", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("test")
+	})
+	fmt.Println("api running")
+	http.ListenAndServe(":8080", r)
 }
