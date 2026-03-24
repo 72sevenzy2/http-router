@@ -7,26 +7,35 @@ import (
 )
 
 type Router struct {
-	routes map[string]http.HandlerFunc
+	routes map[string]map[string]http.HandlerFunc
 }
 
 func NewRouter() *Router {
 	return &Router{
-		routes: make(map[string]http.HandlerFunc),
+		routes: make(map[string]map[string]http.HandlerFunc),
 	}
 }
 
-func (r *Router) Handle(path string, handler http.HandlerFunc) {
+func (r *Router) Handle(method, path string, handler http.HandlerFunc) {
 	if r.routes[path] == nil {
-		r.routes[path] = handler
+		r.routes[path] = make(map[string]http.HandlerFunc)
 	}
+
+	r.routes[path][method] = handler
 }
 
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	handler, ok := s.routes[r.URL.Path]
+	method, ok := s.routes[r.URL.Path]
 
 	if !ok {
 		http.NotFound(w, r)
+		return
+	}
+
+	handler, ok := method[r.Method]
+
+	if !ok {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -46,10 +55,6 @@ func JSON(w http.ResponseWriter, status int, data string) {
 
 func main() {
 	r := NewRouter()
-
-	r.Handle("/hi", func(w http.ResponseWriter, r *http.Request) {
-		JSON(w, http.StatusOK, "test")
-	})
 	fmt.Println("api running")
 	http.ListenAndServe(":8080", r)
 }
