@@ -67,10 +67,16 @@ func WithStatus(status int) ConfigOpts {
 }
 
 // data param func
-func WithData(data map[string]string) ConfigOpts {
+func WithData(data interface{}) ConfigOpts {
 	return func(jo *JsonOptions) {
 		jo.Data = data
 	}
+}
+
+// the response format we will be using, will be making another struct for so
+type Response struct {
+	Data   interface{}
+	Status int
 }
 
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
@@ -83,14 +89,19 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 
 	// initialising each opt to the appropriate param func
 	for _, opt := range opts {
-		opt(options) // each opt is a func that takes a pointer to the JsonOptions struct 
+		opt(options) // each opt is a func that takes a pointer to the JsonOptions struct
 	}
 
 	w.WriteHeader(options.Status)
 	w.Header().Set("Content-Type", "application/json")
 
+	response := &Response{
+		Data:   options.Data,
+		Status: options.Status,
+	}
+
 	if options.Data != nil {
-		json.NewEncoder(w).Encode(options.Data)
+		json.NewEncoder(w).Encode(response)
 	}
 }
 
