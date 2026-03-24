@@ -55,6 +55,10 @@ func JSON(w http.ResponseWriter, status int, data string) {
 
 func main() {
 	r := NewRouter()
+
+	r.Handle("GET", "/hi", func(w http.ResponseWriter, r *http.Request) {
+		JSON(w, http.StatusOK, "working api")
+	})
 	fmt.Println("api running")
 	http.ListenAndServe(":8080", r)
 }
