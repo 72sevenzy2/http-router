@@ -17,7 +17,9 @@ func NewRouter() *Router {
 }
 
 func (r *Router) Handle(path string, handler http.HandlerFunc) {
-	r.routes[path] = handler
+	if r.routes[path] == nil {
+		r.routes[path] = handler
+	}
 }
 
 func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
