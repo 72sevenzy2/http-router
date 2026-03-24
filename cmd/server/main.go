@@ -34,7 +34,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // for json responding so the server can read the incoming info
 
 func JSON(w http.ResponseWriter, status int, data string) {
-	resp := map[string]interface{}{
+	resp := map[string]any{
 		"message": data,
 		"status":  status,
 	}
