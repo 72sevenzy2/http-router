@@ -38,7 +38,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, ok := method[r.Method] // and check if the method is valid
 
 	if !ok {
-		ERROR(w, "method not allowed")
+		ERROR(w, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -67,7 +67,7 @@ func WithStatus(status int) ConfigOpts {
 }
 
 // data param func
-func WithData(data any) ConfigOpts {
+func WithData(data map[string]string) ConfigOpts {
 	return func(jo *JsonOptions) {
 		jo.Data = data
 	}
@@ -95,11 +95,10 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 }
 
 // error json response helper
-func ERROR(w http.ResponseWriter, data string) {
-	w.WriteHeader(http.StatusBadRequest)
-	w.Header().Set("Content-Content", "application/json")
+func ERROR(w http.ResponseWriter, status int) {
+	w.WriteHeader(status)
 
-	JSON(w, WithStatus(http.StatusBadRequest), WithData(map[string]string{
+	JSON(w, WithStatus(status), WithData(map[string]string{
 		"error": "bad request",
 	}))
 }
