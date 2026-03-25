@@ -24,6 +24,9 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc) {
 	}
 
 	r.routes[path][method] = handler // assign both url and method to the handler (handler type is http.handlerFunc)
+	// we're basically taking the path which will be something like "/hi": and the method name, or its type we can call it
+	// for example:       "/hi":
+	//                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
 }
 
 // core routing logic for my router
@@ -35,7 +38,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler, ok := method[r.Method] // and check if the method is valid
+	handler, ok := method[r.Method] // and check if the method is vali
 
 	if !ok {
 		ERROR(w, http.StatusMethodNotAllowed)
@@ -63,6 +66,13 @@ type ConfigOpts func(*JsonOptions) // any func which returns this type ONLY will
 func WithStatus(status int) ConfigOpts {
 	return func(jo *JsonOptions) {
 		jo.Status = status
+	}
+}
+
+// param func for extracting data
+func ExtractReq(data interface{}) ConfigOpts {
+	return func(jo *JsonOptions) {
+		jo.Data = data
 	}
 }
 
@@ -116,9 +126,21 @@ func ERROR(w http.ResponseWriter, status int) {
 func main() {
 	r := NewRouter()
 
-	r.Handle("GET", "/hi", func(w http.ResponseWriter, r *http.Request) {
-		JSON(w, WithStatus(http.StatusOK), WithData(map[string]string{
-			"message": "sup",
+	// test cases
+	type User struct {
+		name string
+		age  int
+	}
+
+	var jake *User = &User{
+		name: "jake",
+		age:  15,
+	}
+
+	r.Handle("POST", "/hi", func(w http.ResponseWriter, r *http.Request) {
+		JSON(w, WithStatus(http.StatusOK), WithData(map[string]any{
+			"username": jake.name,
+			"user age": jake.age,
 		}))
 	})
 	fmt.Println("api running")
