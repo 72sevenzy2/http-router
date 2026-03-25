@@ -101,13 +101,12 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	}
 
 	if options.Data != nil {
-		json.NewEncoder(w).Encode(response)
+		json.NewEncoder(options.w).Encode(response)
 	}
 }
 
 // error json response helper
 func ERROR(w http.ResponseWriter, status int) {
-	w.WriteHeader(status)
 
 	JSON(w, WithStatus(status), WithData(map[string]string{
 		"error": "bad request",
