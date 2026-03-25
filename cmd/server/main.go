@@ -38,7 +38,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler, ok := method[r.Method] // and check if the method is vali
+	handler, ok := method[r.Method] // assign the handler to the method type
 
 	if !ok {
 		ERROR(w, http.StatusMethodNotAllowed)
@@ -54,7 +54,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // using function options to have optional parameters for main JSON helper func (this pattern is also known as the functional params pattern)
 // this pattern is also used by bigger http routers than mine like the chi or mux router.
-type JsonOptions struct { // this struct will be pointed from the ConfigOpts func
+type JsonOptions struct { // this struct will be modified via the ConfigOpts func
 	w      http.ResponseWriter
 	Data   interface{}
 	Status int
@@ -108,9 +108,9 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	response := &Response{
 		Data:   options.Data,
 		Status: options.Status,
-	}
+	} // initialising the response
 
-	if options.Data != nil {
+	if options.Data != nil { // check if data is nil before encoding response
 		json.NewEncoder(options.w).Encode(response)
 	}
 }
@@ -132,15 +132,26 @@ func main() {
 		age  int
 	}
 
-	var jake *User = &User{
-		name: "jake",
-		age:  15,
-	}
 
 	r.Handle("POST", "/hi", func(w http.ResponseWriter, r *http.Request) {
+		// working with actual data
+
+		type Entity struct {
+			User string `json:"user"`
+			Id   int    `json:"id"`
+		}
+
+		var i *Entity // modifying the struct itself since i dont want a copied one
+
+		err := json.NewDecoder(r.Body).Decode(&i)
+		if err != nil {
+			ERROR(w, http.StatusBadRequest)
+			return
+		}
+
 		JSON(w, WithStatus(http.StatusOK), WithData(map[string]any{
-			"username": jake.name,
-			"user age": jake.age,
+			"user": i.User,
+			"id": i.Id,
 		}))
 	})
 	fmt.Println("api running")
