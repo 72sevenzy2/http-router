@@ -85,8 +85,8 @@ func WithData(data interface{}) ConfigOpts {
 
 // the response format we will be using, will be making another struct for so
 type Response struct {
-	Data   interface{}
-	Status int
+	Data   interface{} `json:"data"`
+	Status int         `json:"status"`
 }
 
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
