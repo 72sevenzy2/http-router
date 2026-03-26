@@ -102,8 +102,8 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 		opt(options) // each opt is a func that takes a pointer to the JsonOptions struct
 	}
 
-	w.WriteHeader(options.Status)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(options.Status)
 
 	response := &Response{
 		Data:   options.Data,
@@ -111,7 +111,10 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	} // initialising the response
 
 	if options.Data != nil { // check if data is nil before encoding response
-		json.NewEncoder(options.w).Encode(response)
+		err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
+		if err != nil {
+			http.Error(w, http.StatusText(response.Status), response.Status)
+		}
 	}
 }
 
@@ -119,19 +122,12 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 func ERROR(w http.ResponseWriter, status int) {
 
 	JSON(w, WithStatus(status), WithData(map[string]string{
-		"error": "bad request",
+		"error": http.StatusText(status),
 	}))
 }
 
 func main() {
 	r := NewRouter()
-
-	// test cases
-	type User struct {
-		name string
-		age  int
-	}
-
 
 	r.Handle("POST", "/hi", func(w http.ResponseWriter, r *http.Request) {
 		// working with actual data
@@ -151,7 +147,7 @@ func main() {
 
 		JSON(w, WithStatus(http.StatusOK), WithData(map[string]any{
 			"user": i.User,
-			"id": i.Id,
+			"id":   i.Id,
 		}))
 	})
 	fmt.Println("api running")
