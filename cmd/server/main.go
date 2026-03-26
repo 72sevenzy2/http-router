@@ -110,12 +110,10 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 		Status: options.Status,
 	} // initialising the response
 
-	if options.Data != nil { // check if data is nil before encoding response
 		err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
 		if err != nil {
 			http.Error(w, http.StatusText(response.Status), response.Status)
 		}
-	}
 }
 
 // error json response helper
