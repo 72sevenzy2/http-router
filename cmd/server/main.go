@@ -127,7 +127,7 @@ func ERROR(w http.ResponseWriter, status int) {
 func main() {
 	r := NewRouter()
 
-	r.Handle("POST", "/hi", func(w http.ResponseWriter, r *http.Request) {
+	r.Handle(http.MethodPost, "/hi", func(w http.ResponseWriter, r *http.Request) {
 		// working with actual data
 
 		type Entity struct {
