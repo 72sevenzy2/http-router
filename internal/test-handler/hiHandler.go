@@ -8,13 +8,13 @@ import (
 	"github.com/72sevenzy2/http-router/internal/response"
 )
 
-func hiHandler() http.HandlerFunc {
+func HiHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var i entity.Entity // initilising the entity
 
 		err := json.NewDecoder(r.Body).Decode(&i) // decoding the body to get the data we want
 		if err != nil {                           // if there is no data which we needed in the body, throw an json error msg
-			response.ERROR(w, http.StatusBadRequest)
+			response.JSON(w, response.WithStatus(http.StatusBadRequest), response.WithError(http.StatusText(http.StatusBadRequest)))
 			return
 		}
 		// respond with json returning the users user and the users id
