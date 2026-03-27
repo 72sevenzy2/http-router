@@ -135,7 +135,7 @@ func main() {
 			Id   int    `json:"id"`
 		}
 
-		var i *Entity // modifying the struct itself since i dont want a copied one
+		var i Entity // modifying the struct itself since i dont want a copied one
 
 		err := json.NewDecoder(r.Body).Decode(&i)
 		if err != nil {
