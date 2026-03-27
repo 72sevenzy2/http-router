@@ -15,6 +15,7 @@ func hiHandler() http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(&i)
 		if err != nil {
 			response.ERROR(w, http.StatusBadRequest)
+			return
 		}
 
 		response.JSON(w, response.WithStatus(http.StatusOK), response.WithData(map[string]interface{}{
