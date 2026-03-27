@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"github.com/72sevenzy2/http-router/internal/response"
 )
 
 type Router struct { // initializing the router struct to hold all the routes
@@ -39,7 +40,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, ok := method[r.Method] // assign the handler to the method type
 
 	if !ok {
-		ERROR(w, http.StatusMethodNotAllowed)
+		response.ERROR(w, http.StatusMethodNotAllowed)
 		return
 	}
 
