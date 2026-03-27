@@ -20,13 +20,6 @@ func WithStatus(status int) ConfigOpts {
 	}
 }
 
-// param func for extracting data
-func ExtractReq(data interface{}) ConfigOpts {
-	return func(jo *JsonOptions) {
-		jo.Data = data
-	}
-}
-
 // data param func
 func WithData(data interface{}) ConfigOpts {
 	return func(jo *JsonOptions) {
