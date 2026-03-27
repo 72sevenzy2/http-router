@@ -1,154 +1,23 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/72sevenzy2/http-router/internal/response"
+	"github.com/72sevenzy2/http-router/internal/router"
 )
 
-type Router struct { // initializing the router struct to hold all the routes
-	routes map[string]map[string]http.HandlerFunc
-}
-
-func NewRouter() *Router {
-	// contructing the router upon the func being called
-	return &Router{
-		routes: make(map[string]map[string]http.HandlerFunc),
-	}
-}
-
-// adding routes, and assigning the method of the route aswell as the url to the handler which then is executed in the ServeHTTP func
-func (r *Router) Handle(method, path string, handler http.HandlerFunc) {
-	if r.routes[path] == nil {
-		r.routes[path] = make(map[string]http.HandlerFunc)
-	}
-
-	r.routes[path][method] = handler // assign both url and method to the handler (handler type is http.handlerFunc)
-	// we're basically taking the path which will be something like "/hi": and the method name, or its type we can call it
-	// for example:       "/hi":
-	//                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
-}
-
-// core routing logic for my router
-func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	method, ok := s.routes[r.URL.Path] // search for if the url path exists
-
-	if !ok {
-		http.NotFound(w, r)
-		return
-	}
-
-	handler, ok := method[r.Method] // assign the handler to the method type
-
-	if !ok {
-		ERROR(w, http.StatusMethodNotAllowed)
-		return
-	}
-
-	handler(w, r) // if all pass, then execute
-}
-
-// for json responding so the server can read the incoming info
-
-// configuration structs for json helpers below:
-
-// using function options to have optional parameters for main JSON helper func (this pattern is also known as the functional params pattern)
-// this pattern is also used by bigger http routers than mine like the chi or mux router.
-type JsonOptions struct { // this struct will be modified via the ConfigOpts func
-	w      http.ResponseWriter
-	Data   interface{}
-	Status int
-}
-
-type ConfigOpts func(*JsonOptions) // any func which returns this type ONLY will use a pointer to the JsonOptions struct like used here
-
-// status param func
-func WithStatus(status int) ConfigOpts {
-	return func(jo *JsonOptions) {
-		jo.Status = status
-	}
-}
-
-// param func for extracting data
-func ExtractReq(data interface{}) ConfigOpts {
-	return func(jo *JsonOptions) {
-		jo.Data = data
-	}
-}
-
-// data param func
-func WithData(data interface{}) ConfigOpts {
-	return func(jo *JsonOptions) {
-		jo.Data = data
-	}
-}
-
-// the response format we will be using, will be making another struct for so
-type Response struct {
-	Data   interface{} `json:"data"`
-	Status int         `json:"status"`
-}
-
-func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
-	// assigning the default values if i were to assign no params when calling the JSON func
-	options := &JsonOptions{ // these options will be replaced if there were opts included when calling this func with the data in those opts
-		w:      w,
-		Status: http.StatusOK,
-		Data:   nil,
-	}
-
-	// initialising each opt to the appropriate param func
-	for _, opt := range opts {
-		opt(options) // each opt is a func that takes a pointer to the JsonOptions struct
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(options.Status)
-
-	response := &Response{
-		Data:   options.Data,
-		Status: options.Status,
-	} // initialising the response
-
-		err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		}
-}
-
-// error json response helper
-func ERROR(w http.ResponseWriter, status int) {
-
-	JSON(w, WithStatus(status), WithData(map[string]string{
-		"error": http.StatusText(status),
-	}))
-}
-
 func main() {
-	r := NewRouter()
+	r := router.NewRouter()
 
-	r.Handle(http.MethodPost, "/hi", func(w http.ResponseWriter, r *http.Request) {
-		// working with actual data
-
-		type Entity struct {
-			User string `json:"user"`
-			Id   int    `json:"id"`
-		}
-
-		var i Entity // modifying the struct itself since i dont want a copied one
-
-		err := json.NewDecoder(r.Body).Decode(&i)
-		if err != nil {
-			ERROR(w, http.StatusBadRequest)
-			return
-		}
-
-		JSON(w, WithStatus(http.StatusOK), WithData(map[string]any{
-			"user": i.User,
-			"id":   i.Id,
+	r.Handle(http.MethodGet, "/hi", func(w http.ResponseWriter, r *http.Request) {
+		response.JSON(w, response.WithStatus(http.StatusOK), response.WithData(map[string]string{
+			"message": "hello",
 		}))
 	})
-	fmt.Println("api running")
+
+	fmt.Println("server running on port 8080")
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {
 		panic(err)
