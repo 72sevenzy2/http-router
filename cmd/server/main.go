@@ -4,18 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/72sevenzy2/http-router/internal/response"
 	"github.com/72sevenzy2/http-router/internal/router"
+	"github.com/72sevenzy2/http-router/internal/test-handler"
 )
 
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodGet, "/hi", func(w http.ResponseWriter, r *http.Request) {
-		response.JSON(w, response.WithStatus(http.StatusOK), response.WithData(map[string]string{
-			"message": "hello",
-		}))
-	})
+	r.Handle(http.MethodPost, "/p", handler.HiHandler());
 
 	fmt.Println("server running on port 8080")
 	err := http.ListenAndServe(":8080", r)

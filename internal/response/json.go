@@ -1,14 +1,15 @@
-package response 
+package response
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 )
 
 type JsonOptions struct { // this struct will be modified via the ConfigOpts func
 	w      http.ResponseWriter
 	Data   interface{}
 	Status int
+	Error  string
 }
 
 type ConfigOpts func(*JsonOptions) // any func which returns this type ONLY will use a pointer to the JsonOptions struct like used here
@@ -17,6 +18,13 @@ type ConfigOpts func(*JsonOptions) // any func which returns this type ONLY will
 func WithStatus(status int) ConfigOpts {
 	return func(jo *JsonOptions) {
 		jo.Status = status
+	}
+}
+
+// with error param func
+func WithError(msg string) ConfigOpts {
+	return func(jo *JsonOptions) {
+		jo.Error = msg
 	}
 }
 
@@ -31,6 +39,7 @@ func WithData(data interface{}) ConfigOpts {
 type Response struct {
 	Data   interface{} `json:"data"`
 	Status int         `json:"status"`
+	Error  string      `json:"error"`
 }
 
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
@@ -39,6 +48,7 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 		w:      w,
 		Status: http.StatusOK,
 		Data:   nil,
+		Error:  "",
 	}
 
 	// initialising each opt to the appropriate param func
@@ -52,18 +62,11 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	response := &Response{
 		Data:   options.Data,
 		Status: options.Status,
+		Error:  options.Error,
 	} // initialising the response
 
-		err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		}
-}
-
-// error json response helper
-func ERROR(w http.ResponseWriter, status int) {
-
-	JSON(w, WithStatus(status), WithData(map[string]string{
-		"error": http.StatusText(status),
-	}))
+	err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
 }
