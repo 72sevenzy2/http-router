@@ -38,7 +38,7 @@ func WithData(data interface{}) ConfigOpts {
 type Response struct {
 	Data   interface{} `json:"data"`
 	Status int         `json:"status"`
-	Error  string      `json:"error"`
+	Error  string      `json:"error,omitempty"`
 }
 
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
