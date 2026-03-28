@@ -1,4 +1,4 @@
-package response
+package helpers
 
 import (
 	"github.com/72sevenzy2/http-router/internal/response"
