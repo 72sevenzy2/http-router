@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/72sevenzy2/http-router/internal/response"
+	"github.com/72sevenzy2/http-router/internal/response/helpers"
 	"net/http"
 )
 
@@ -40,7 +40,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, ok := method[r.Method] // assign the handler to the method type
 
 	if !ok {
-		response.JSON(w, response.WithStatus(http.StatusMethodNotAllowed), response.WithError(http.StatusText(http.StatusMethodNotAllowed)))
+		helpers.FAILED(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
