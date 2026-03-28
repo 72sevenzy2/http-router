@@ -11,11 +11,10 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Handle(http.MethodPost, "/p", handler.HiHandler());
+	r.Handle(http.MethodPost, "/p", handler.HiHandler())
 
 	fmt.Println("server running on port 8080")
-	err := http.ListenAndServe(":8080", r)
-	if err != nil {
-		panic(err)
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		panic(err);
 	}
 }
