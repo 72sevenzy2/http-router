@@ -63,8 +63,7 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 		Error:  options.Error,
 	} // initialising the response
 
-	err := json.NewEncoder(w).Encode(response) // handling errors while encoding it aswell
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
