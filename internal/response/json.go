@@ -6,7 +6,6 @@ import (
 )
 
 type JsonOptions struct { // this struct will be modified via the ConfigOpts func
-	w      http.ResponseWriter
 	Data   interface{}
 	Status int
 	Error  string
@@ -45,7 +44,6 @@ type Response struct {
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	// assigning the default values if i were to assign no params when calling the JSON func
 	options := &JsonOptions{ // these options will be replaced if there were opts included when calling this func with the data in those opts
-		w:      w,
 		Status: http.StatusOK,
 		Data:   nil,
 		Error:  "",
@@ -65,7 +63,7 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 		Error:  options.Error,
 	} // initialising the response
 
-	err := json.NewEncoder(options.w).Encode(response) // handling errors while encoding it aswell
+	err := json.NewEncoder(w).Encode(response) // handling errors while encoding it aswell
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 	}
