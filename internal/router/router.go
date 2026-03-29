@@ -3,6 +3,7 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/72sevenzy2/http-router/internal/response/helpers"
 )
@@ -32,8 +33,12 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 func Auth(AuthKey string) Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			if r.Header.Get("Authorization") != AuthKey {
-				helpers.FAILED(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+			authLab := r.Header.Get("Authorization") // grabbing the token
+
+			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
+
+			if token == authLab || token != AuthKey {
+				helpers.FAILED(w, http.StatusForbidden, "Invalid Token")
 				return
 			}
 
