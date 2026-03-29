@@ -1,12 +1,27 @@
 package router
 
 import (
-	"github.com/72sevenzy2/http-router/internal/response/helpers"
+	"fmt"
 	"net/http"
+
+	"github.com/72sevenzy2/http-router/internal/response/helpers"
 )
 
 type Router struct { // initializing the router struct to hold all the routes
 	routes map[string]map[string]http.HandlerFunc
+}
+
+type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
+
+// middleware
+func Logger(next http.HandlerFunc) http.HandlerFunc { // takes in a our original handler of the request being made, and returns a new handler.
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Request has started with method: ", r.Method)
+
+		next(w, r) // runs the original handler
+
+		fmt.Println("Request has ended")
+	}
 }
 
 func NewRouter() *Router {
@@ -44,5 +59,6 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler(w, r) // if all pass, then execute
+	core := Logger(handler)
+	core(w, r)
 }
