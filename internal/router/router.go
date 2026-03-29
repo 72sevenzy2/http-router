@@ -13,7 +13,7 @@ type Router struct { // initializing the router struct to hold all the routes
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
 
-// middleware
+// middleware (logger)
 func Logger(next http.HandlerFunc) http.HandlerFunc { // takes in a our original handler of the request being made, and returns a new handler.
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Request has started with method: ", r.Method)
@@ -21,6 +21,18 @@ func Logger(next http.HandlerFunc) http.HandlerFunc { // takes in a our original
 		next(w, r) // runs the original handler
 
 		fmt.Println("Request has ended")
+	}
+}
+
+// auth middleware (no real authorization yet but will be adding this for a test case)
+
+func Auth(next http.HandlerFunc, AuthKey string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != AuthKey {
+			helpers.FAILED(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+			return
+	}
+		next(w, r)
 	}
 }
 
@@ -59,6 +71,6 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	core := Logger(handler)
+	core := Auth(Logger(handler), "sia")
 	core(w, r)
 }
