@@ -37,8 +37,8 @@ func Auth(AuthKey string) Middleware {
 
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
-			if token == authLab || token != AuthKey {
-				helpers.FAILED(w, http.StatusForbidden, "Invalid Token")
+			if token == authLab || token != AuthKey { // check if the authkey is matching
+				helpers.FAILED(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
 				return
 			}
 
@@ -48,7 +48,6 @@ func Auth(AuthKey string) Middleware {
 }
 
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
-
 func (r *Router) Use(s Middleware) {
 	r.Middlewares = append(r.Middlewares, s)
 }
