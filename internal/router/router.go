@@ -8,32 +8,53 @@ import (
 )
 
 type Router struct { // initializing the router struct to hold all the routes
-	routes map[string]map[string]http.HandlerFunc
+	routes      map[string]map[string]http.HandlerFunc
+	Middlewares []Middleware // storing our middlewares here (type is our Middleware function type)
 }
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
 
 // middleware (logger)
-func Logger(next http.HandlerFunc) http.HandlerFunc { // takes in a our original handler of the request being made, and returns a new handler.
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Request has started with method: ", r.Method)
+func Logger() Middleware { // returns the middleware type (which takes in a handler and returns a new one)
+	return func(hf http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("Request has started with method: ", r.Method)
 
-		next(w, r) // runs the original handler
+			hf(w, r)
 
-		fmt.Println("Request has ended")
+			fmt.Println("Request has ended")
+		}
 	}
 }
 
 // auth middleware (no real authorization yet but will be adding this for a test case)
 
-func Auth(next http.HandlerFunc, AuthKey string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != AuthKey {
-			helpers.FAILED(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
-			return
+func Auth(AuthKey string) Middleware {
+	return func(hf http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("Authorization") != AuthKey {
+				helpers.FAILED(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+				return
+			}
+
+			hf(w, r)
+		}
 	}
-		next(w, r)
+}
+
+// Use func to use the middewares (also appending it to the Middlewares type in router struct
+
+func (r *Router) Use(s Middleware) {
+	r.Middlewares = append(r.Middlewares, s)
+}
+
+// func to apply the middlewares
+func (r *Router) applyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
+	for i := len(r.Middlewares) - 1; i >= 0; i-- {
+		h = r.Middlewares[i](h)
 	}
+
+	return h
 }
 
 func NewRouter() *Router {
@@ -71,6 +92,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	core := Auth(Logger(handler), "sia")
-	core(w, r)
+	wra := s.applyMiddlewares(handler)
+	wra(w, r)
+
 }
