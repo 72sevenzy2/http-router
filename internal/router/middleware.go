@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/72sevenzy2/http-router/internal/response/helpers"
 )
@@ -13,11 +14,13 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (
 func Logger() Middleware { // returns the middleware type (which takes in a handler and returns a new one)
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("Request has started with method: ", r.Method)
+			start := time.Now()
+			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
 
 			hf(w, r)
 
-			fmt.Println("Request has ended")
+			endTime := time.Since(start)
+			fmt.Println("Request has ended:\n ", endTime)
 		}
 	}
 }
