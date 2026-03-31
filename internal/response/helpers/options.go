@@ -5,10 +5,10 @@ import (
 	"net/http"
 )
 
-func OK(w http.ResponseWriter, data any) {
+func Ok(w http.ResponseWriter, data any) {
 	response.JSON(w, response.WithData(data), response.WithStatus(http.StatusOK))
 }
 
-func FAILED(w http.ResponseWriter, status int, msg string) {
+func Failed(w http.ResponseWriter, status int, msg string) {
 	response.JSON(w, response.WithStatus(status), response.WithError(msg))
 }

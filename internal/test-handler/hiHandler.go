@@ -14,11 +14,11 @@ func HiHandler() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(&i) // decoding the body to get the data we want
 		if err != nil {                           // if there is no data which we needed in the body, throw an json error msg
-			helpers.FAILED(w, http.StatusBadRequest, err.Error())
+			helpers.Failed(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		// respond with json returning the users user and the users id
-		helpers.OK(w, map[string]interface{}{
+		helpers.Ok(w, map[string]interface{}{
 			"User": i.User,
 			"Id":   i.Id,
 		})

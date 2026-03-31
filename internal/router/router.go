@@ -43,7 +43,7 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler, ok := method[r.Method] // assign the handler to the method type
 
 	if !ok {
-		helpers.FAILED(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		helpers.Failed(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 

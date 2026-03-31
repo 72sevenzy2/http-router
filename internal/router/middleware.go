@@ -35,7 +35,7 @@ func Auth(AuthKey string) Middleware {
 			token := strings.TrimPrefix(authLab, "Bearer ") // removing the "bearer " part of the token to then compare it to the authkey
 
 			if token == authLab || token != AuthKey { // check if the authkey is matching
-				helpers.FAILED(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
+				helpers.Failed(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
 				return
 			}
 
