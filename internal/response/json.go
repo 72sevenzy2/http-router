@@ -6,7 +6,7 @@ import (
 )
 
 type JsonOptions struct { // this struct will be modified via the ConfigOpts func
-	Data   interface{}
+	Data   any
 	Status int
 	Error  string
 }
@@ -36,9 +36,9 @@ func WithData(data interface{}) ConfigOpts {
 
 // the response format we will be using, will be making another struct for so
 type Response struct {
-	Data   interface{} `json:"data"`
-	Status int         `json:"status"`
-	Error  string      `json:"error,omitempty"`
+	Data   any    `json:"data"`
+	Status int    `json:"status"`
+	Error  string `json:"error,omitempty"`
 }
 
 func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
@@ -66,7 +66,7 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
- 
+
 	// test case for recoverer middleware
 	// panic("he")
 }
