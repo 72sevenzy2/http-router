@@ -11,7 +11,8 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Use(router.Logger(), )
+	r.Use(router.Recoverer())
+	r.Use(router.Logger())
 	r.Use(router.Auth("siam"))
 
 	r.Handle(http.MethodPost, "/p", handler.HiHandler())

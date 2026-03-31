@@ -66,4 +66,7 @@ func JSON(w http.ResponseWriter, opts ...ConfigOpts) {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+ 
+	// test case for recoverer middleware
+	// panic("he")
 }
