@@ -44,6 +44,22 @@ func Auth(AuthKey string) Middleware {
 	}
 }
 
+// recoverer middleware (for preventing server crashes)
+
+func Recoverer() Middleware {
+	return func(hf http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			defer func ()  {
+				if err := recover(); err != nil {
+					fmt.Println("caught: ", err)
+				}
+			}()
+
+			hf(w, r)
+		}
+	}
+}
+
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
 func (r *Router )Use(s Middleware) {
 	r.Middlewares = append(r.Middlewares, s)
