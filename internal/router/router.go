@@ -24,7 +24,7 @@ func (r *Router) Handle(method, path string, handler http.HandlerFunc) {
 		r.Routes[path] = make(map[string]http.HandlerFunc) // assign the path to the method type (GET, POST, PUT etc)
 	}
 
-	r.Routes[path][method] = handler // assign both url and method to the handler (handler type is http.handlerFunc)
+	r.Routes[path][method] = handler // assign method to the handler (handler type is http.handlerFunc)
 	// we're basically taking the path which will be something like "/hi": and the method name, or its type we can call it
 	// for example:       "/hi":
 	//                       "GET": "and some handler here, (in this case, it will be the http handlerfunc we used)"
