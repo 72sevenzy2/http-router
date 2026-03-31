@@ -47,8 +47,8 @@ func (s *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	wra := s.ApplyMiddlewares(handler)
-	wra(w, r)
+	finalHandler := s.ApplyMiddlewares(handler)
+	finalHandler(w, r)
 
 }
 
