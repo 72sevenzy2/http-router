@@ -25,9 +25,9 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 	}
 }
 
-// auth middleware (no real authorization yet but will be adding this for a test case)
+// bearer auth middleware (this includes having a bearer token which will then be compared to the authkey )
 
-func Auth(AuthKey string) Middleware {
+func BearerAuth(AuthKey string) Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			authLab := r.Header.Get("Authorization") // grabbing the token
@@ -44,12 +44,30 @@ func Auth(AuthKey string) Middleware {
 	}
 }
 
+// basic auth middleware (this auth includes having a user and password inorder to access the endpoint)
+
+func BasicAuth(user, password string) Middleware { // implements the middleware type which returns a handler
+	return func(hf http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+
+			authUser, authPassword, ok := r.BasicAuth()
+
+			if !ok || authUser != user || authPassword != password {
+				helpers.Failed(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+				return
+			}
+
+			hf(w, r)
+		}
+	}
+}
+
 // recoverer middleware (for preventing server crashes)
 
 func Recoverer() Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			defer func ()  {
+			defer func() {
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
 				}
@@ -61,10 +79,9 @@ func Recoverer() Middleware {
 }
 
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
-func (r *Router )Use(s Middleware) {
+func (r *Router) Use(s Middleware) {
 	r.Middlewares = append(r.Middlewares, s)
 }
-
 
 // func to apply the middlewares
 func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
