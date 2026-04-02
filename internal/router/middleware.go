@@ -76,12 +76,9 @@ func Recoverer() Middleware {
 			hf(w, r)
 		}
 	}
+
 }
 
-// Use func to use the middewares (also appending it to the Middlewares type in router struct
-func (r *Router) Use(s Middleware) {
-	r.Middlewares = append(r.Middlewares, s)
-}
 
 // func to apply the middlewares
 func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
@@ -90,4 +87,10 @@ func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
 	}
 
 	return h
+}
+
+
+// Use func to use the middewares (also appending it to the Middlewares type in router struct
+func (r *Router) Use(s Middleware) {
+	r.Middlewares = append(r.Middlewares, s)
 }
