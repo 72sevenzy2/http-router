@@ -10,7 +10,8 @@ Built for educational reasons and solely to use myself since I like having contr
 
 # Example usage:
 
-` package main
+```
+ package main
 
 import (
 	"fmt"
@@ -32,12 +33,12 @@ func main() {
 	}
 }
 
-`
+```
 > That of course is a simple way to use it though;
 
 Example usage with all the middleware:
 
-`
+```
 
 package main
 
@@ -66,13 +67,13 @@ func main() {
 	}
 }
 
-`
+```
 > But when using an authentication middleware, make sure to choose 1, either BearerAuth or BasicAuth.
 
 
 Example usage with route-specific middleware:
 
-`
+```
 package main
 
 import (
@@ -95,4 +96,4 @@ func main() {
 	}
 }
 
-`
+```
