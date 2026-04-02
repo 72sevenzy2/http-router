@@ -19,10 +19,14 @@ func NewRouter() *Router {
 }
 
 // adding routes, and assigning the method of the route aswell as the url to the handler which then is executed in the ServeHTTP func
-func (r *Router) Handle(method, path string, handler http.HandlerFunc) {
+func (r *Router) Handle(method, path string, handler http.HandlerFunc, mws ...Middleware) {
 	if r.Routes[path] == nil {
 		r.Routes[path] = make(map[string]http.HandlerFunc) // assign the path to the method type (GET, POST, PUT etc)
 	}
+
+	for i := len(mws) -1; i >= 0; i-- {
+		handler = mws[i](handler)
+	} 
 
 	r.Routes[path][method] = handler // assign method to the handler (handler type is http.handlerFunc)
 	// we're basically taking the path which will be something like "/hi": and the method name, or its type we can call it
