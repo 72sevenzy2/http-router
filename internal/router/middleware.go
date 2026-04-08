@@ -14,12 +14,12 @@ type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (
 func Logger() Middleware { // returns the middleware type (which takes in a handler and returns a new one)
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
+			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
 
-			hf(w, r)
+			hf(w, r) // calling the next function to continue to the next handler
 
-			endTime := time.Since(start)
+			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
 		}
 	}
@@ -36,10 +36,10 @@ func BearerAuth(AuthKey string) Middleware {
 
 			if token == authLab || token != AuthKey { // check if the authkey is matching
 				helpers.Failed(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
-				return
+				return // exit the request
 			}
 
-			hf(w, r)
+			hf(w, r) // continue to next handler
 		}
 	}
 }
@@ -50,14 +50,14 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 
-			authUser, authPassword, ok := r.BasicAuth()
+			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves. 
 
-			if !ok || authUser != user || authPassword != password {
+			if !ok || authUser != user || authPassword != password { // run the necessary logic
 				helpers.Failed(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
 				return
 			}
 
-			hf(w, r)
+			hf(w, r) // continue to next handler
 		}
 	}
 }
@@ -67,18 +67,17 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 func Recoverer() Middleware {
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			defer func() {
+			defer func() { // catches any crashses and recovers the request, while printing the err in return.
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
 				}
 			}()
 
-			hf(w, r)
+			hf(w, r) // next handler
 		}
 	}
 
 }
-
 
 // func to apply the middlewares
 func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
@@ -88,7 +87,6 @@ func (r *Router) ApplyMiddlewares(h http.HandlerFunc) http.HandlerFunc {
 
 	return h
 }
-
 
 // Use func to use the middewares (also appending it to the Middlewares type in router struct
 func (r *Router) Use(s Middleware) {
