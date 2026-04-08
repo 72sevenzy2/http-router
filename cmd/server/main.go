@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/72sevenzy2/http-router/internal/router"
+	"github.com/72sevenzy2/http-router/router"
 	"github.com/72sevenzy2/http-router/internal/test-handler"
 )
 
