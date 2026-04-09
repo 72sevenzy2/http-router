@@ -14,9 +14,9 @@ type JsonOptions struct { // this struct will be modified via the ConfigOpts fun
 type ConfigOpts func(*JsonOptions) // any func which returns this type ONLY will use a pointer to the JsonOptions struct like used here
 
 // status param func
-func WithStatus(status int) ConfigOpts {
+func WithStatus(status int) ConfigOpts { // type of ConfigOpts which returns a func which points to the JsonOptions struct to modify its data which will then be used in my JSON helper func.
 	return func(jo *JsonOptions) {
-		jo.Status = status
+		jo.Status = status // modifies the JsonOptions struct (status) to the status passed in as the function param
 	}
 }
 
