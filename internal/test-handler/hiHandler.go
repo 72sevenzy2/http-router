@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/72sevenzy2/http-router/internal/model"
+	"github.com/72sevenzy2/http-router/internal/test-model"
 	"github.com/72sevenzy2/http-router/internal/response/helpers"
 )
 
@@ -18,7 +18,7 @@ func HiHandler() http.HandlerFunc {
 			return
 		}
 		// respond with json returning the users user and the users id
-		helpers.Ok(w, map[string]interface{}{
+		helpers.Ok(w, map[string]any{
 			"User": i.User,
 			"Id":   i.Id,
 		})
