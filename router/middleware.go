@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/72sevenzy2/http-router/internal/response/helpers"
+	"github.com/72sevenzy2/json-parser/helpers"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
