@@ -28,7 +28,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/72sevenzy2/http-router/internal/response/helpers"
+	"github.com/72sevenzy2/json-parser/helpers"
 )
 
 type Router struct { // initializing the router struct to hold all the routes
