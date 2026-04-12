@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/72sevenzy2/http-router/internal/test-model"
-	"github.com/72sevenzy2/http-router/internal/response/helpers"
+	"github.com/72sevenzy2/json-parser/helpers"
 )
 
 func HiHandler() http.HandlerFunc {
