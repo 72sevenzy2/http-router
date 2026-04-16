@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,7 +37,7 @@ func BearerAuth(AuthKey string) Middleware {
 
 			if token == authLab || token != AuthKey { // check if the authkey is matching
 				helpers.Failed(w, http.StatusForbidden, "Invalid Token") // if not then throw a failed json response
-				return // exit the request
+				return                                                   // exit the request
 			}
 
 			hf(w, r) // continue to next handler
@@ -50,7 +51,7 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 
-			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves. 
+			authUser, authPassword, ok := r.BasicAuth() // extracting the user and password and if it exists (ok) from the r.BasicAuth() func, which is a built in method in go to do so, instead of manually parsing it ourselves.
 
 			if !ok || authUser != user || authPassword != password { // run the necessary logic
 				helpers.Failed(w, http.StatusForbidden, http.StatusText(http.StatusForbidden))
@@ -58,6 +59,20 @@ func BasicAuth(user, password string) Middleware { // implements the middleware 
 			}
 
 			hf(w, r) // continue to next handler
+		}
+	}
+}
+
+// timeout middleware
+
+func Timeout(seconds int) Middleware {
+	return func(hf http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ctx, cancel := context.WithTimeout(r.Context(), time.Duration(seconds)*time.Second) // initialising timeout (in seconds)
+
+			defer cancel() // cancelling at the end of the func (current handler)
+
+			hf(w, r.WithContext(ctx)) // ServeHTTP(w, and "r" with the context 'ctx')
 		}
 	}
 }
