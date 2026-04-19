@@ -69,8 +69,6 @@ func main() {
 }
 
 ```
-> But when using an authentication middleware, make sure to choose 1, either BearerAuth or BasicAuth.
-
 
 Example usage with route-specific middleware:
 
