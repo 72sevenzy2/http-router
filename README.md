@@ -6,7 +6,7 @@ Built for my own educational reasons and use.
 - This router is built ontop the golang stdlib for managing http routes (http.handlerFunc).
 - works likewise some of the bigger http routers such as chi/mux, you handle routes with this router using the "r.Handle(...)" func which you then pass in the necessary parameters (eg: path, path method, middleware, and the the actual handler needed to run the logic for that endpoint.)
 - also supports route-specific middleware, by passing your desired middleware to the "r.Handle()" func as the 4th parameters, its important that i note you can add more than one middleware, but if you dont need route-specific middlewares, you can apply global middlewares, an example usage will be shown below.
-- middlewares. I added about 5 middlewares in this project, the first being a simple logging middleware, second and third being authentication, (second is an BearerToken auth, which uses a token to verify a users credentials), (third being basicAuth auth, which involves a username and password to verify credentials.), and fourth being a recoverer middleware (if used make sure you use it FIRST before any other middleware), it prevents server crashes when a bug is occured. And lastly the timeout middleware, which the purpose of it is to cut off slow requests, for example when making an endpoint and a user goes to it and for some reason its slow or takes too much time to fetch the necessary data for the page to render, the timeout middleware will cancel the request, though it can also cancel due to other factors aswell (not just the particular website being slow itself). The timeout middleware takes in one paramters, which is the number of seconds the request should last before being cancelled.
+- also includes middlewares, such as basicAuth, recoverer mw, logger mw, a bearerAuth mw, and a timeout middleware, example usages for all will be shown below.
 
 # Example usage:
 
@@ -34,9 +34,9 @@ func main() {
 }
 
 ```
-> That of course is a simple way to use it though;
+> That of course is a example with no middlewares attached yet.
 
-Example usage with all the middleware:
+Example usage with all the middlewares:
 
 ```
 
@@ -52,11 +52,12 @@ import (
 func main() {
 	r := router.NewRouter()
 
-	r.Use(router.Recoverer()) // recoverer middleware always goes first
-	r.Use(router.Logger())
-	r.Use(router.BearerAuth("secretKey")) // can be any token (which has to be a string)
+	r.Use(router.Recoverer()) // recoverer middleware always goes first, prevents server crashes when a bug has occured.
+	r.Use(router.Logger()) // standard logging middleware (to view request details.)
+	r.Use(router.BearerAuth("secretKey")) // can be any token (which has to be a string),
 	r.Use(router.BasicAuth("user1", "password1234")) // parameters username and password need to be included when using.
 	r.Use(router.Timeout(5)) // can be any time (its in seconds) depending on how long you want the time limit on every request.
+	// the Timeout mw is used for prevent slow requests by setting a timeout in which the request should last.
 
 	r.Handle(http.MethodGet, "/resp", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("responded"))
