@@ -1,5 +1,4 @@
 # An http router built from scratch, built ontop of the go stdlib (net/http).
-Built for my own educational reasons and use.
 
 # Features / context
 
