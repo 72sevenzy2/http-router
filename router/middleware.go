@@ -24,9 +24,10 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 			fmt.Println("Request has ended:\n ", endTime)
 
 			fmt.Println("Request body (1 kilobyte of body data):")
-			var buf bytes.Buffer
-			lim := io.LimitReader(r.Body, 1024)
-			r.Body = io.NopCloser(io.TeeReader(lim, &buf))
+			var buf bytes.Buffer // a buffer which will hold the r.Body
+			lim := io.LimitReader(r.Body, 1024) // limit size to 1 kilobyte of data to prevent large copis which can be time consuming
+			r.Body = io.NopCloser(io.TeeReader(lim, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
+			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 			fmt.Println(buf.String())
 
 
