@@ -1,8 +1,10 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -18,10 +20,20 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
 
-			hf(w, r) // calling the next function to continue to the next handler
-
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
+
+			var buf bytes.Buffer                           // a buffer which will hold the r.Body
+			lim := io.LimitReader(r.Body, 1024)            // limit size to 1 kilobyte of data to prevent large copis which can be time consuming
+			r.Body = io.NopCloser(io.TeeReader(lim, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
+			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
+			hf(w, r) // calling the next function to continue to the next handler
+			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
+
+			fmt.Println("Request body (1 kilobyte of body data):")
+			fmt.Println(buf.String())
+
+			fmt.Println("Request headers:", r.Header)
 		}
 	}
 }
