@@ -23,9 +23,10 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
 
-			fmt.Println("Request body:")
+			fmt.Println("Request body (1 kilobyte of body data):")
 			var buf bytes.Buffer
-			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf))
+			lim := io.LimitReader(r.Body, 1024)
+			r.Body = io.NopCloser(io.TeeReader(lim, &buf))
 			fmt.Println(buf.String())
 
 
