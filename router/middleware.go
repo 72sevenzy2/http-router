@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -18,10 +19,17 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 			start := time.Now() // setting the current time (before the request has ended)
 			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
 
-			hf(w, r) // calling the next function to continue to the next handler
-
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
+
+			fmt.Println("Request body:")
+			body, _ := io.ReadAll(r.Body)
+			fmt.Println(string(body))
+
+			fmt.Println("Request headers:")
+			fmt.Println(r.Header)
+
+			hf(w, r) // calling the next function to continue to the next handler
 		}
 	}
 }
