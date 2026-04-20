@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -23,11 +24,12 @@ func Logger() Middleware { // returns the middleware type (which takes in a hand
 			fmt.Println("Request has ended:\n ", endTime)
 
 			fmt.Println("Request body:")
-			body, _ := io.ReadAll(r.Body)
-			fmt.Println(string(body))
+			var buf bytes.Buffer
+			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf))
+			fmt.Println(buf.String())
 
-			fmt.Println("Request headers:")
-			fmt.Println(r.Header)
+
+			fmt.Println("Request headers:", r.Header)
 
 			hf(w, r) // calling the next function to continue to the next handler
 		}
