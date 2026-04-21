@@ -39,18 +39,20 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 				size: 1024,
 			}
 
-			confSize(opt)
-			
-			// compressing body if over 1 kb
-			body := buf.String()
-			if int64(len(body)) > opt.size {
-				body = body[:opt.size] + "...(compressed)"
+			if confSize != nil {
+				confSize(opt)
 			}
 
 			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 			hf(w, r) // calling the next function to continue to the next handler
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
+
+			// compressing body if over 1 kb
+			body := buf.String()
+			if int64(len(body)) > opt.size {
+				body = body[:opt.size] + "...(truncated)"
+			}
 
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
