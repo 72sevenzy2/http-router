@@ -30,7 +30,7 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now() // setting the current time (before the request has ended)
-			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
+			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
 			var buf bytes.Buffer // a buffer which will hold the r.Body
 
@@ -57,10 +57,14 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 			endTime := time.Since(start) // after the request has ended, in which we will print below
 			fmt.Println("Request has ended:\n ", endTime)
 
-			fmt.Println("Request body (1 kilobyte of body data):")
+			fmt.Println("request body data: (with data size of:)", opt.size)
 			fmt.Println(body)
 
-			fmt.Println("Request headers:", r.Header)
+			// redacting sensitive header before printing
+			header := r.Header.Clone()
+			header.Del("Authorization");
+
+			fmt.Println("Request headers:", header)
 		}
 	}
 }
