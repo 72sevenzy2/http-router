@@ -14,26 +14,57 @@ import (
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
 
-func Logger() Middleware { // returns the middleware type (which takes in a handler and returns a new one)
+// functional param pattern to work with optional parameters for setting default body sizes/custom body sizes that are to be logged.
+type bodySize struct {
+	size int64
+}
+type LoggerConf func(*bodySize)
+
+func SetBody(size int64) LoggerConf {
+	return func(bs *bodySize) {
+		bs.size = size
+	}
+}
+
+func Logger(confSize LoggerConf) Middleware { // returns the middleware type (which takes in a handler and returns a new one)
 	return func(hf http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now() // setting the current time (before the request has ended)
-			fmt.Printf("Request has started with method: %s, in time: %s\n", r.Method, start)
+			fmt.Printf("Request has started with URL: %s, and method: %s, and in time: %s\n", r.URL, r.Method, start)
 
-			endTime := time.Since(start) // after the request has ended, in which we will print below
-			fmt.Println("Request has ended:\n ", endTime)
+			var buf bytes.Buffer // a buffer which will hold the r.Body
 
-			var buf bytes.Buffer                           // a buffer which will hold the r.Body
-			lim := io.LimitReader(r.Body, 1024)            // limit size to 1 kilobyte of data to prevent large copis which can be time consuming
-			r.Body = io.NopCloser(io.TeeReader(lim, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
+			// setting default value for request body size
+			opt := &bodySize{
+				size: 1024,
+			}
+
+			if confSize != nil {
+				confSize(opt)
+			}
+
+			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
 			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
 			hf(w, r) // calling the next function to continue to the next handler
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 
-			fmt.Println("Request body (1 kilobyte of body data):")
-			fmt.Println(buf.String())
+			// compressing body if over 1 kb
+			body := buf.String()
+			if int64(len(body)) > opt.size {
+				body = body[:opt.size] + "...(truncated)"
+			}
 
-			fmt.Println("Request headers:", r.Header)
+			endTime := time.Since(start) // after the request has ended, in which we will print below
+			fmt.Println("Request has ended:\n ", endTime)
+
+			fmt.Println("request body data: (with data size of:)", opt.size)
+			fmt.Println(body)
+
+			// redacting sensitive header before printing
+			header := r.Header.Clone()
+			header.Del("Authorization");
+
+			fmt.Println("Request headers:", header)
 		}
 	}
 }
