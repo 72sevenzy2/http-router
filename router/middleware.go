@@ -27,12 +27,13 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.ResponseWriter.WriteHeader(code)
 }
 
+// overriding Write to capture bytes
 func (rw *responseWriter) Write(b []byte) (int, error) {
 	if rw.status == 0 {
 		rw.status = http.StatusOK
 	}
 	v, err := rw.ResponseWriter.Write(b)
-	rw.size += v
+	rw.size += v // tracking the size in bytes
 	return v, err
 }
 
