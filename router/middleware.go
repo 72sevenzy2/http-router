@@ -14,6 +14,28 @@ import (
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc // the middleware type (takes in the current handler and returns a new one)
 
+// custom responseWriter type to capture status code and request byte size.
+type responseWriter struct {
+	http.ResponseWriter
+	status int
+	size   int
+}
+
+// override WriteHeader func()
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.status = code; // saving status code in struct
+	rw.ResponseWriter.WriteHeader(code)
+}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	if rw.status == 0 {
+		rw.status = http.StatusOK
+	}
+	v, err := rw.ResponseWriter.Write(b)
+	rw.size += v
+	return v, err
+}
+
 // functional param pattern to work with optional parameters for setting default body sizes/custom body sizes that are to be logged.
 type bodySize struct {
 	size int64
@@ -44,8 +66,14 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 			}
 
 			r.Body = io.NopCloser(io.TeeReader(r.Body, &buf)) // using io.NopCloser as io.TeeReader does not implement io.ReadCloser.
-			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.
-			hf(w, r) // calling the next function to continue to the next handler
+			// io.TeeReader allows the current handler to read the request body data, whilst also allowing copying.4
+
+			rw := &responseWriter{ // default status code and custom response writer initialisation
+				ResponseWriter: w,
+				status: http.StatusOK,
+			}
+
+			hf(rw, r) // calling the next function to continue to the next handler
 			// by calling hf() before printing, we give time to the io Readers above to read the request body data.
 
 			// compressing body if over 1 kb
@@ -55,14 +83,14 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 			}
 
 			endTime := time.Since(start) // after the request has ended, in which we will print below
-			fmt.Println("Request has ended:\n ", endTime)
+			fmt.Printf("Request has ended: %s, with status code %d ||| and with request body size (in bytes): %d", endTime, rw.status, rw.size)
 
 			fmt.Println("request body data: (with data size of:)", opt.size)
 			fmt.Println(body)
 
 			// redacting sensitive header before printing
 			header := r.Header.Clone()
-			header.Del("Authorization");
+			header.Del("Authorization")
 
 			fmt.Println("Request headers:", header)
 		}
