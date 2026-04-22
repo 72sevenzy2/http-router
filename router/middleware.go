@@ -81,7 +81,7 @@ func Logger(confSize LoggerConf) Middleware { // returns the middleware type (wh
 			}
 
 			endTime := time.Since(start) // after the request has ended, in which we will print below
-			fmt.Printf("Request has ended: %s, with status code %d ||| and with request body size (in bytes): %d", endTime, rw.status, rw.size)
+			fmt.Printf("Request has ended: %s, with status code %d ||| and with response body size (in bytes): %d", endTime, rw.status, rw.size)
 
 			fmt.Println("request body data: (with data size of:)", opt.size)
 			fmt.Println(body)
