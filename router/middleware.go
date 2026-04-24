@@ -154,6 +154,7 @@ func Recoverer() Middleware {
 			defer func() { // catches any crashses and recovers the request, while printing the err in return.
 				if err := recover(); err != nil {
 					fmt.Println("caught: ", err)
+					helpers.Failed(w, http.StatusInternalServerError, fmt.Sprintf("server error: %s", err))
 				}
 			}()
 
