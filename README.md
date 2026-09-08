@@ -4,7 +4,7 @@
 # Features:
 
 - Route grouping for nested routes.
-- Ensures RFC-Compliancy over edge cases.
+- Ensures RFC-Compliant operations.
 - No external dependencies (excluding ones made for Xrouter).
 - Supports middleware aswell as route specific middleware handling.
 - Route parameter compatibility.
